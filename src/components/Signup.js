@@ -1,69 +1,72 @@
 import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import '../styles/formStyle.css';
 import { useSignup } from "../hooks/useSignup";
-import { useSelector } from "react-redux";
+import axios from 'axios';
+import axiosInstance from '../axios';
 
-
-const Signup = () => {
+const FormComponent = () => {
   const [formData, setFormData] = useState({
     name: '',
+    username: '',
     email: '',
-    // isStudent: false,
-    // rollnumber: '',
     password: '',
+    password2: '',
+    role:'False',
   });
 
-  const person = useSelector((state) => {
-    return state.persons.person;
-  })
-  //  console.log(person,123456789);
-
   const handleChange = (event) => {
-    const { name, value} = event.target;
+    const { name, value } = event.target;
 
     setFormData({ ...formData, [name]: value });
   };
-  const {signup,error,isLoading} = useSignup();
+
+  const { signup, error, isLoading } = useSignup();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // console.log(formData);
-    await signup(formData);
-    setFormData({
-      name: '',
-      email: '',
-      // isStudent: false,
-      // rollnumber: '',
-      password: '',
-    });
+    console.log(formData);
+
+    // Check if passwords match
+    if (formData.password !== formData.password2) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.post('/Auth/register', formData);
+      console.log('Signup response:', response.data);
+      setFormData({
+        name: '',
+        username: '',
+        email: '',
+        password: '',
+        password2: '',
+        role:'False'
+      });
+    } catch (error) {
+      console.log('Register Error', error);
+    }
   };
 
   return (
     <form className="formContainer" onSubmit={handleSubmit}>
       <div className="form-box">
         <h1 className="form-head">SIGNUP</h1>
-        {/* <div className="question">
-          
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={formData.isStudent}
-                onChange={handleChange}
-                name="isStudent"
-                color="primary"
-              />
-            }
-            label="Yes, I am a student"
-          />
-        </div> */}
         <TextField
           label="Name"
           name="name"
           value={formData.name}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Username"
+          name="username"
+          value={formData.username}
           onChange={handleChange}
           fullWidth
           margin="normal"
@@ -79,30 +82,28 @@ const Signup = () => {
           margin="normal"
           required
         />
-        {/* {formData.isStudent && (
-            <TextField
-            label="Roll Number"
-            name="rollnumber"
-            type="number"
-            value={formData.rollnumber}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
-        )} */}
         <TextField
-            label="Password"
-            name="password"
-            type="password"
-            value={formData.password}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
+          label="Password"
+          name="password"
+          type="password"
+          value={formData.password}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
         />
-        <Button fullWidth type="submit" variant="contained" color="primary">
-          Sign Up
+        <TextField
+          label="Confirm Password"
+          name="password2"
+          type="password"
+          value={formData.password2}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <Button type="submit" variant="contained" color="primary" fullWidth>
+          SIGNUP
         </Button>
         {error && <div className="error">{error}</div>}
       </div>
@@ -110,4 +111,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default FormComponent;

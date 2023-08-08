@@ -1,11 +1,28 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import axios from 'axios';
+import '../css/CameraCapture.css';
+import { redirect } from 'react-router-dom';
+import axiosInstance from '../axios';
 
 const CameraCapture = () => {
   const videoRef = useRef();
   const canvasRef = useRef();
   const [capturedImage, setCapturedImage] = useState(null);
+  const [student_Id, setStudent_Id] = useState(2103199);
 
-  const handleCapture = () => {
+  useEffect(() => {
+    // Set up the video stream
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          videoRef.current.srcObject = stream;
+        })
+        .catch((error) => console.error('Error accessing the camera:', error));
+    }
+  }, []);
+
+  const handleCapture = async () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
@@ -22,52 +39,20 @@ const CameraCapture = () => {
 
     // Update captured image state
     setCapturedImage(imageData);
-  };
-
-  // Access front camera stream
-  const getCameraStream = () => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices
-        .getUserMedia({ video: { facingMode: 'user' } })
-        .then((stream) => {
-          const video = videoRef.current;
-          video.srcObject = stream;
-          video.play();
-        })
-        .catch((error) => {
-          console.log('Error accessing camera:', error);
-        });
-    }
-  };
-
-  // Start camera stream on component mount
-  React.useEffect(() => {
-    getCameraStream();
-    return () => {
-      // Stop camera stream on component unmount
-      const stream = videoRef.current.srcObject;
-      if (stream) {
-        const tracks = stream.getTracks();
-        tracks.forEach((track) => {
-          track.stop();
-        });
-      }
+    console.log(imageData);
+      const res= await axiosInstance.post("Face_Recog/register_image", {
+        student_Id,
+        image: imageData,
+      });
+      console.log(res)
     };
-  }, []);
 
   return (
-    <div>
-      <video ref={videoRef} style={{ width: '500px', height: 'auto' }} />
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
-      <button onClick={handleCapture}>Capture</button>
-      {capturedImage && (
-        <div>
-          <h2>Captured Image:</h2>
-          <img src={capturedImage} style={{width:'500px'}} alt="Captured" />
-        </div>
-      )}
-    </div>
-  );
+    <div className="video-container">
+    <video ref={videoRef} autoPlay playsInline />
+    <canvas ref={canvasRef} style={{ display: "none" }} />
+    <button onClick={handleCapture}>Capture Image</button>
+  </div>
+);
 };
-
 export default CameraCapture;
