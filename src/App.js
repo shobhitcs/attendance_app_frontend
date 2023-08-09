@@ -29,9 +29,9 @@ function App() {
     <div className="App">
       <BrowserRouter>
         {/* Navbar */}
-        <div className="Navbar">
-          {!isVerifying && <Navbar />}
-        </div>
+        <DashBoard />
+        <Navbar />
+
 
         {/* Body Content */}
         <div className="BodyContent">
@@ -42,7 +42,6 @@ function App() {
             <Route path="/edit" element={<EditProfile />} />
           </Routes>
         </div>
-        <DashBoard />
       </BrowserRouter>
     </div>
   );
