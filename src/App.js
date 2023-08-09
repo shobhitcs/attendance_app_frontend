@@ -42,6 +42,7 @@ function App() {
             <Route path="/edit" element={<EditProfile />} />
           </Routes>
         </div>
+        <DashBoard />
       </BrowserRouter>
     </div>
   );
